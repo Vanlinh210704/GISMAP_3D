@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panorama Viewer</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        #container {
+            width: 100%;
+            height: 100vh;
+            background-color: #000;
+        }
+        #nextBtn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+        }
+        #bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 5px;
+            background-color: red;
+            width: 0;
+            transition: width 0.2s;
+        }
+        .hide {
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        img {
+            border-radius: 4px;  /* Rounded border */
+            width: 100px; /* Set a small width */
+        }
+        img:hover {
+            box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div id="progress">
+        <div id="bar"></div>
+    </div>
+    <div id="container"></div>
+
+    <button id="nextBtn"><img id="nextBtnImg" src="" alt="Next Panorama"></button>
+
+    <!-- Thêm tải thư viện PANOLENS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/panolens/1.6.0/panolens.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/105/three.min.js"></script>
+    <script src="../js/panolens.min.js"></script>
+    <script>
+        let panoramas = [];
+        let bar = document.querySelector('#bar');
+
+        function onProgressUpdate(event) {
+            let percentage = event.progress.loaded / event.progress.total * 100;
+            bar.style.width = percentage + "%";
+            if (percentage >= 100) {
+                bar.classList.add('hide');
+                setTimeout(function(){
+                    bar.style.width = 0;
+                }, 1000);
+            }
+        }
+
+        // Tạo các đối tượng panorama
+        let container = document.querySelector('#container');
+        <% imagelinks.forEach((link, index) => { %>
+            const panorama<%= index %> = new PANOLENS.ImagePanorama('<%= link %>');
+            panorama<%= index %>.addEventListener('progress', onProgressUpdate);
+            panoramas.push(panorama<%= index %>);
+        <% }); %>
+
+        infospot = new PANOLENS.Infospot(350, PANOLENS.DataImage.Info);
+        panorama0.add(infospot);
+
+        let panoramaIndex = 0;
+        let viewer = new PANOLENS.Viewer({ container: container });
+
+        // Thêm panorama đầu tiên vào viewer
+        panoramas.forEach((panorama) => {
+            viewer.add(panorama);
+        });
+
+        let nextBtn = document.querySelector('#nextBtn');
+        let nextBtnImg = document.querySelector('#nextBtnImg');
+
+        // Cập nhật hình ảnh của nút next
+        function updateNextButtonImage() {
+            let nextIndex = (panoramaIndex + 1) % panoramas.length;
+            nextBtnImg.src = panoramas[nextIndex].image.src;
+        }
+
+        // Chuyển đổi giữa các panorama
+        nextBtn.addEventListener('click', () => {
+            bar.classList.remove('hide');
+            panoramaIndex = (panoramaIndex + 1) % panoramas.length;
+            viewer.setPanorama(panoramas[panoramaIndex]);
+            updateNextButtonImage();
+        });
+
+        // Khởi tạo hình ảnh nút next
+        updateNextButtonImage();
+    </script>
+</body>
+</html>

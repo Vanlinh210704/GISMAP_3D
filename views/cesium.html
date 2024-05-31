@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style type="text/css">
+    #cesiumContainer { width: 100%; height: 100%; }
+    body, html { width: 100%; height: 100%; margin: 0; padding: 0; }
+  </style>
+</head>
+<body>
+    <div id="cesiumContainer" class="fullSize"></div>
+    <div id="loadingOverlay">
+        <div id="toolbar" style="position: absolute;top: 0;left: 0;">
+            <input type="text" id="address" placeholder="Enter ">
+            <button onclick="filterByPointDataName()">Search</button>
+        </div>
+        <div id="errorDisplay" style="position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);display: none;">
+            <p id="errorMessage"></p>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var viewer = new Cesium.Viewer("cesiumContainer", {
+            // geocoder: false,
+            animation: true,
+            creditsDisplay: false,
+            timeline: false,
+            fullscreenButton: false
+        });
+
+        function loadGeoJsonData() {
+
+            // var geojsonFeature = JSON.parse('<%- JSON.stringify(geojsonResult) %>');
+            var promise = Cesium.GeoJsonDataSource.load('data_4phuong.geojson');
+            promise.then(function(dataSource) { 
+                viewer.dataSources.add(dataSource);
+
+                var entities = dataSource.entities.values;
+                for (var i = 0; i < entities.length; i++) {
+                    var entity = entities[i];
+
+                    entity.polygon.material = Cesium.Color.fromRandom({
+                        alpha: 0.6
+                    });
+
+                    entity.polygon.extrudedHeight = entity.properties.height;
+                }
+
+                viewer.zoomTo(dataSource);
+            }).catch(function(error) {
+                var errorMessage = document.getElementById("errorMessage");
+                errorMessage.textContent = "Error loading GeoJSON: " + error.message;
+                var errorDisplay = document.getElementById("errorDisplay");
+                errorDisplay.style.display = "block";
+            });
+        }
+
+        function filterByPointDataName() {
+            var pointDataNameInput = document.getElementById("address").value;
+            var dataSource = viewer.dataSources.get(0);
+            var entities = dataSource.entities.values;
+
+            for (var i = 0; i < entities.length; i++) {
+                var entity = entities[i];
+                if (entity.properties.address == pointDataNameInput) {
+                    entity.show = true;
+                } else {
+                    entity.show = false;
+                }
+            }
+        }
+
+        loadGeoJsonData();
+    </script>
+</body>
+</html>
