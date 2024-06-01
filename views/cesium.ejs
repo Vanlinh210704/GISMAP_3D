@@ -1,39 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Cesium.js"></script>
-  <link href="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-  <style type="text/css">
-    #cesiumContainer { width: 100%; height: 100%; }
-    body, html { width: 100%; height: 100%; margin: 0; padding: 0; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive GeoData Visualization</title>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body, html {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #cesiumContainer {
+            width: 100%;
+            height: 100%;
+        }
+        #toolbar {
+            position: absolute;
+            top: 10px;
+            left: 50px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+        }
+        #toolbar input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: calc(100% - 20px);
+        }
+        #filterIcon {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 10;
+        }
+        #filterIcon:hover {
+            background: rgba(245, 245, 245, 0.9);
+        }
+    </style>
 </head>
 <body>
     <div id="cesiumContainer" class="fullSize"></div>
     <div id="loadingOverlay"></div>
-    <div id="toolbar" style="position: absolute; top: 0; left: 0; background: rgba(255, 255, 255, 0.8); padding: 10px;">
-        <input type="text" id="point_data_name" placeholder="Enter point_data_name">
-        <input type="text" id="district" placeholder="Enter district">
-        <input type="number" id="min_area" placeholder="Min Area">
-        <input type="number" id="max_area" placeholder="Max Area">
-        <input type="number" id="min_price" placeholder="Min Price">
-        <input type="number" id="max_price" placeholder="Max Price">
-        <input type="number" id="min_height" placeholder="Min Height">
-        <input type="number" id="max_height" placeholder="Max Height">
-        <button onclick="filterBuildings()">Search</button>
+    <div id="filterIcon">
+        <i class="fas fa-filter"></i>
     </div>
-    <script type="text/javascript">
-        var viewer = new Cesium.Viewer("cesiumContainer", {
+    <div id="toolbar">
+        <input type="text" id="point_data_name" placeholder="Tên điểm dữ liệu" oninput="filterBuildings()">
+        <input type="text" id="district" placeholder="Quận" oninput="filterBuildings()">
+        <input type="number" id="min_area" placeholder="Diện tích tối thiểu" oninput="filterBuildings()">
+        <input type="number" id="max_area" placeholder="Diện tích tối đa" oninput="filterBuildings()">
+        <input type="number" id="min_price" placeholder="Giá tối thiểu" oninput="filterBuildings()">
+        <input type="number" id="max_price" placeholder="Giá tối đa" oninput="filterBuildings()">
+        <input type="number" id="min_height" placeholder="Chiều cao tối thiểu" oninput="filterBuildings()">
+        <input type="number" id="max_height" placeholder="Chiều cao tối đa" oninput="filterBuildings()">
+    </div>
+    <script>
+        var viewer = new Cesium.Viewer('cesiumContainer', {
             animation: true,
             timeline: false,
             fullscreenButton: false,
-            shouldAnimate: true
+            shouldAnimate: true,
+            imageryProvider: false // Disable default imagery provider
         });
+
+        // Add OpenStreetMap imagery layer
+        viewer.imageryLayers.addImageryProvider(new Cesium.OpenStreetMapImageryProvider({
+            url: 'https://a.tile.openstreetmap.org/'
+        }));
 
         var dataSource;
 
         function loadGeoJsonData() {
-            var geojsonFeature = JSON.parse('<%- JSON.stringify(geojsonResult) %>'); 
+            var geojsonFeature = JSON.parse('<%- geojsonResult %>');
             var promise = Cesium.GeoJsonDataSource.load(geojsonFeature);
 
             promise.then(function(result) {
@@ -56,12 +109,12 @@
 
         function getColorByPointDataName(pointDataName) {
             switch (pointDataName.toLowerCase()) {
-                case "house": return Cesium.Color.YELLOW.withAlpha(0.6);
-                case "school": return Cesium.Color.GREEN.withAlpha(0.6);
-                case "hospital": return Cesium.Color.BLUE.withAlpha(0.6);
-                case "shopping mall": return Cesium.Color.RED.withAlpha(0.6);
-                case "apartment": return Cesium.Color.PINK.withAlpha(0.6);
-                case "university": return Cesium.Color.GREEN.withAlpha(0.6);
+                case "house": return Cesium.Color.fromCssColorString('rgba(255, 182, 193, 0.6)'); // Light Pink
+                case "school": return Cesium.Color.fromCssColorString('rgba(144, 238, 144, 0.6)'); // Light Green
+                case "hospital": return Cesium.Color.fromCssColorString('rgba(173, 216, 230, 0.6)'); // Light Blue
+                case "shopping mall": return Cesium.Color.fromCssColorString('rgba(222, 184, 135, 0.6)'); // BurlyWood
+                case "apartment": return Cesium.Color.fromCssColorString('rgba(255, 192, 203, 0.6)'); // Pink
+                case "university": return Cesium.Color.fromCssColorString('rgba(144, 238, 144, 0.6)'); // Light Green
                 default: return Cesium.Color.fromRandom({ alpha: 0.6 });
             }
         }
@@ -72,16 +125,18 @@
         }
 
         function filterBuildings() {
-            var pointDataNameInput = document.getElementById("point_data_name").value.toLowerCase();
-            var districtInput = document.getElementById("district").value.toLowerCase();
-            var minAreaInput = parseFloat(document.getElementById("min_area").value);
-            var maxAreaInput = parseFloat(document.getElementById("max_area").value);
-            var minPriceInput = parseFloat(document.getElementById("min_price").value);
-            var maxPriceInput = parseFloat(document.getElementById("max_price").value);
-            var minHeightInput = parseFloat(document.getElementById("min_height").value);
-            var maxHeightInput = parseFloat(document.getElementById("max_height").value);
+            var pointDataNameInput = document.getElementById('point_data_name').value.toLowerCase();
+            var districtInput = document.getElementById('district').value.toLowerCase();
+            var minAreaInput = parseFloat(document.getElementById('min_area').value);
+            var maxAreaInput = parseFloat(document.getElementById('max_area').value);
+            var minPriceInput = parseFloat(document.getElementById('min_price').value);
+            var maxPriceInput = parseFloat(document.getElementById('max_price').value);
+            var minHeightInput = parseFloat(document.getElementById('min_height').value);
+            var maxHeightInput = parseFloat(document.getElementById('max_height').value);
 
             var entities = dataSource.entities.values;
+            var filteredEntities = [];
+
             for (var i = 0; i < entities.length; i++) {
                 var entity = entities[i];
                 var pointDataName = entity.properties.point_data_name.getValue().toLowerCase();
@@ -102,10 +157,29 @@
                 } else if ((!isNaN(minHeightInput) && (isNaN(height) || height < minHeightInput)) || (!isNaN(maxHeightInput) && (isNaN(height) || height > maxHeightInput))) {
                     show = false;
                 }
-                
+
                 entity.show = show;
+
+                if (show) {
+                    filteredEntities.push(entity);
+                }
+            }
+
+            if (filteredEntities.length > 0) {
+                var boundingSphere = Cesium.BoundingSphere.fromEntities(filteredEntities);
+                viewer.camera.flyToBoundingSphere(boundingSphere);
             }
         }
+
+        document.getElementById('filterIcon').addEventListener('click', function() {
+            var toolbar = document.getElementById('toolbar');
+            if (toolbar.style.display === 'none' || toolbar.style.display === '') {
+                toolbar.style.display = 'flex';
+            } else {
+                toolbar.style.display = 'none';
+            }
+        });
+
         loadGeoJsonData();
     </script>
 </body>
