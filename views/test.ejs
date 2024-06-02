@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style type="text/css">
+    #test { width: 20%; height: 100%; }
+    #cesiumContainer { width: 80%; height: 100%; }
+    /* body, html { width: 85%; height: 100%; margin: 0; padding: 0; } */
+    /* Thay đổi giao diện bảng thông tin */
+    .cesium-infoBox {
+        background-color: rgba(0, 0, 0, 0.7) !important; /* Nền màu đen với độ trong suốt */
+        border: 1px solid #ffffff !important; /* Đường viền trắng */
+        color: #ffffff !important; /* Màu chữ trắng */
+        padding: 10px !important; /* Khoảng cách bên trong */
+        border-radius: 10px !important; /* Bo tròn các góc */
+    }
+
+    .cesium-infoBox table {
+        width: 50%;
+    }
+
+    .cesium-infoBox th, .cesium-infoBox td {
+        padding: 5px 10px; /* Khoảng cách bên trong ô */
+    }
+
+    .cesium-infoBox th {
+        text-align: left; /* Căn trái cho tiêu đề cột */
+    }
+    .cesium-svgPath-svg{
+        display: none;
+    }
+    .cesium-geocoder-searchButton{
+        display: none;
+    }
+    .cesium-viewer-geocoderContainer .cesium-geocoder-input{
+        display: none;
+    }
+    .cesium-button .cesium-toolbar-button .cesium-home-button{
+        display: none;
+    }
+    .cesium-toolbar-button{
+        width: 0;
+        height: 0;
+    }
+    .cesium-viewer-bottom{
+        width: 0;
+        height: 0;
+    }
+    .cesium-animation-shuttleRingG{
+        width: 0;
+        height: 0;
+    }
+    #animation_buttonNormal{
+        width: 0;
+        height: 0;
+    }
+    .cesium-animation-shuttleRingBack{
+        width: 0;
+        height: 0;
+        display: none;
+    }
+    .cesium-animation-shuttleRingSwoosh{
+        width: 0;
+        height: 0;
+        display: none;
+    }
+    .cesium-animation-buttonMain{
+        width: 0;
+        height: 0;
+        display: none;
+    }
+    .cesium-animation-rectButton .cesium-animation-buttonToggled{
+        width: 0;
+        height: 0;
+        display: none;
+    }
+    .cesium-animation-knobOuter{
+        width: 0;
+        height: 0;
+        display: none;
+    }
+    .cesium-animation-blank{
+        width: 0;
+        height: 0;
+        display: none;  
+    }
+    .cesium-animation-knobInner{
+        fill: none ;
+    }
+    .cesium-animation-shuttleRingPointer{
+        fill: none ;
+    }
+    .cesium-animation-rectButton .cesium-animation-buttonPath{
+        fill: none ;
+    }
+    .cesium-animation-buttonToggled .cesium-animation-buttonGlow {
+        fill: none ;
+    }
+    .cesium-animation-svgText{
+        fill: none ;
+        width: 0;
+        height: 0;
+    }
+  </style>
+</head>
+<body>
+    <div style="display: flex;">
+        <div id="cesiumContainer" class="ád">
+            <svg:svg style="display: none;"></svg:svg>
+        </div>
+        <div id="test" class="sdfdf" >
+
+        </div>
+    </div>
+
+    <div id="loadingOverlay"></div>
+    <div id="toolbar" style="position: absolute; top: 0; left: 0; background: rgba(255, 255, 255, 0.8); padding: 10px;">
+        <input type="text" id="point_data_name" placeholder="Enter point_data_name">
+        <!-- <input type="text" id="district" placeholder="Enter district">
+        <input type="number" id="min_area" placeholder="Min Area">
+        <input type="number" id="max_area" placeholder="Max Area">
+        <input type="number" id="min_price" placeholder="Min Price">
+        <input type="number" id="max_price" placeholder="Max Price">
+        <input type="number" id="min_height" placeholder="Min Height">
+        <input type="number" id="max_height" placeholder="Max Height"> -->
+        <button onclick="filterBuildings()">Search</button>
+    </div>
+    <script type="text/javascript">
+        var viewer = new Cesium.Viewer("cesiumContainer", {
+
+            animation: true,
+            timeline: false,
+            fullscreenButton: false,
+            shouldAnimate: true
+        });
+            
+        var dataSource;
+
+        function loadGeoJsonData() {
+            var geojsonFeature = JSON.parse('<%- JSON.stringify(geojsonResult) %>'); 
+            var promise = Cesium.GeoJsonDataSource.load(geojsonFeature);
+
+            promise.then(function(result) {
+                dataSource = result;
+                viewer.dataSources.add(dataSource);
+
+                var entities = dataSource.entities.values;
+                for (var i = 0; i < entities.length; i++) {
+                    var entity = entities[i];
+                    var pointDataName = entity.properties.point_data_name.getValue();
+                    entity.polygon.material = getColorByPointDataName(pointDataName);
+                    entity.polygon.extrudedHeight = getHeightPropertyValue(entity.properties.height);
+
+                    // Tạo bảng thông tin động
+                    entity.description = createInfoTable(entity.properties);
+                }
+
+                viewer.zoomTo(dataSource);
+            }).catch(function(error) {
+                console.error("Error loading GeoJSON:", error);
+            });
+        }
+
+        function createInfoTable(properties) {
+            var table = '<table class="cesium-infoBox">';
+            properties.propertyNames.forEach(function(propertyName) {
+                var value = properties[propertyName].getValue();
+                if (propertyName === "image_gallery_link" && value) {
+                    // Nếu thuộc tính là 'link' và có giá trị, tạo một liên kết
+                    table += '<tr><th>' + propertyName + '</th><td><a href="' + value + '" target="_blank">Xem Them</a></td></tr>';
+                } else {
+                    // Nếu không phải là 'link', hiển thị giá trị bình thường
+                    table += '<tr><th>' + propertyName + '</th><td>' + value + '</td></tr>';
+                }
+            });
+            table += '</table>';
+            return table;
+        }
+
+        function getColorByPointDataName(pointDataName) {
+            switch (pointDataName.toLowerCase()) {
+                case "house": return Cesium.Color.YELLOW.withAlpha(0.6);
+                case "school": return Cesium.Color.GREEN.withAlpha(0.6);
+                case "hospital": return Cesium.Color.BLUE.withAlpha(0.6);
+                case "shopping mall": return Cesium.Color.RED.withAlpha(0.6);
+                case "apartment": return Cesium.Color.PINK.withAlpha(0.6);
+                case "university": return Cesium.Color.GREEN.withAlpha(0.6);
+                default: return Cesium.Color.fromRandom({ alpha: 0.6 });
+            }
+        }
+
+        function getHeightPropertyValue(heightProperty) {
+            var heightValue = parseFloat(heightProperty.getValue());
+            return isNaN(heightValue) ? 0 : heightValue;
+        }
+
+        function filterBuildings() {
+            var pointDataNameInput = document.getElementById("point_data_name").value.toLowerCase();
+            var districtInput = document.getElementById("district").value.toLowerCase();
+            var minAreaInput = parseFloat(document.getElementById("min_area").value);
+            var maxAreaInput = parseFloat(document.getElementById("max_area").value);
+            var minPriceInput = parseFloat(document.getElementById("min_price").value);
+            var maxPriceInput = parseFloat(document.getElementById("max_price").value);
+            var minHeightInput = parseFloat(document.getElementById("min_height").value);
+            var maxHeightInput = parseFloat(document.getElementById("max_height").value);
+
+            var entities = dataSource.entities.values;
+            for (var i = 0; i < entities.length; i++) {
+                var entity = entities[i];
+                var pointDataName = entity.properties.point_data_name.getValue().toLowerCase();
+                var district = entity.properties.district.getValue().toLowerCase();
+                var area = parseFloat(entity.properties.area.getValue());
+                var price = parseFloat(entity.properties.price.getValue());
+                var height = parseFloat(entity.properties.height.getValue());
+
+                var show = true;
+                if (pointDataNameInput !== "" && pointDataName !== pointDataNameInput) {
+                    show = false;
+                } else if (districtInput !== "" && district !== districtInput) {
+                    show = false;
+                } else if ((!isNaN(minAreaInput) && (isNaN(area) || area < minAreaInput)) || (!isNaN(maxAreaInput) && (isNaN(area) || area > maxAreaInput))) {
+                    show = false;
+                } else if ((!isNaN(minPriceInput) && (isNaN(price) || price < minPriceInput)) || (!isNaN(maxPriceInput) && (isNaN(price) || price > maxPriceInput))) {
+                    show = false;
+                } else if ((!isNaN(minHeightInput) && (isNaN(height) || height < minHeightInput)) || (!isNaN(maxHeightInput) && (isNaN(height) || height > maxHeightInput))) {
+                    show = false;
+                }
+                
+                entity.show = show;
+            }
+        }
+
+        loadGeoJsonData();
+    </script>
+</body>
+</html>
