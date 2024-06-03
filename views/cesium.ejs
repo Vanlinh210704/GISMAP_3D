@@ -7,53 +7,17 @@
     <script src="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Cesium.js"></script>
     <link href="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7HUi bX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="../css/style_cesium.css">
     <style>
-        body, html {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        #cesiumContainer {
-            width: 100%;
-            height: 100%;
-        }
-        #toolbar {
-            position: absolute;
-            top: 10px;
-            left: 50px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-            display: none;
-            flex-direction: column;
-            gap: 10px;
-        }
-        #toolbar input {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            width: calc(100% - 20px);
-        }
-        #filterIcon {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px;
-            border-radius: 50%;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-            cursor: pointer;
-            z-index: 10;
-        }
-        #filterIcon:hover {
-            background: rgba(245, 245, 245, 0.9);
-        }
+ 
     </style>
 </head>
 <body>
+    
     <div id="cesiumContainer" class="fullSize"></div>
     <div id="loadingOverlay"></div>
     <div id="filterIcon">
@@ -69,6 +33,13 @@
         <input type="number" id="min_height" placeholder="Chiều cao tối thiểu" oninput="filterBuildings()">
         <input type="number" id="max_height" placeholder="Chiều cao tối đa" oninput="filterBuildings()">
     </div>
+    <!-- <div class="sidebar" id="sidebar">
+        <div class="widget">
+            <h2>Tiêu đề Tiện ích</h2>
+            <p>Nội dung của tiện ích.</p>
+        </div>
+    </div>
+    <button id="toggleButton">≡</button> -->
     <script>
         var viewer = new Cesium.Viewer('cesiumContainer', {
             animation: true,
@@ -77,53 +48,100 @@
             shouldAnimate: true,
             imageryProvider: false // Disable default imagery provider
         });
-
+    
         // Add OpenStreetMap imagery layer
         viewer.imageryLayers.addImageryProvider(new Cesium.OpenStreetMapImageryProvider({
             url: 'https://a.tile.openstreetmap.org/'
         }));
-
+    
         var dataSource;
-
+    
         function loadGeoJsonData() {
-            var geojsonFeature = JSON.parse('<%- geojsonResult %>');
+            console.log("Loading GeoJSON data...");
+            var geojsonFeature = JSON.parse('<%- JSON.stringify(geojsonResult) %>');
+            console.log("GeoJSON Feature: ", geojsonFeature);
             var promise = Cesium.GeoJsonDataSource.load(geojsonFeature);
-
+    
             promise.then(function(result) {
+                console.log("GeoJSON loaded successfully");
                 dataSource = result;
                 viewer.dataSources.add(dataSource);
-
+    
                 var entities = dataSource.entities.values;
                 for (var i = 0; i < entities.length; i++) {
                     var entity = entities[i];
+                    console.log("Entity properties: ", entity.properties);
                     var pointDataName = entity.properties.point_data_name.getValue();
-                    entity.polygon.material = getColorByPointDataName(pointDataName);
+                    entity.polygon.material = getColorByPointDataName(pointDataName).material;
                     entity.polygon.extrudedHeight = getHeightPropertyValue(entity.properties.height);
+                    entity.description = createInfoTable(entity.properties);
+                    // Set outline and outline color
+                    entity.polygon.outline = true;
+                    entity.polygon.outlineColor = getColorByPointDataName(pointDataName).outlineColor;
                 }
-
+    
                 viewer.zoomTo(dataSource);
             }).catch(function(error) {
                 console.error("Error loading GeoJSON:", error);
             });
         }
-
-        function getColorByPointDataName(pointDataName) {
-            switch (pointDataName.toLowerCase()) {
-                case "house": return Cesium.Color.fromCssColorString('rgba(255, 182, 193, 0.6)'); // Light Pink
-                case "school": return Cesium.Color.fromCssColorString('rgba(144, 238, 144, 0.6)'); // Light Green
-                case "hospital": return Cesium.Color.fromCssColorString('rgba(173, 216, 230, 0.6)'); // Light Blue
-                case "shopping mall": return Cesium.Color.fromCssColorString('rgba(222, 184, 135, 0.6)'); // BurlyWood
-                case "apartment": return Cesium.Color.fromCssColorString('rgba(255, 192, 203, 0.6)'); // Pink
-                case "university": return Cesium.Color.fromCssColorString('rgba(144, 238, 144, 0.6)'); // Light Green
-                default: return Cesium.Color.fromRandom({ alpha: 0.6 });
-            }
+    
+        function createInfoTable(properties) {
+            var table = '<table class="cesium-infoBox">';
+            properties.propertyNames.forEach(function(propertyName) {
+                var value = properties[propertyName].getValue();
+                if (propertyName === "image_gallery_link" && value) {
+                    // Create a clickable link if the property is 'image_gallery_link' and it has a value
+                    table += '<tr><th>' + propertyName + '</th><td><a href="' + value + '" target="_blank">Xem thêm</a></td></tr>';
+                } else {
+                    // Display the value normally for all other properties
+                    table += '<tr><th>' + propertyName + '</th><td>' + value + '</td></tr>';
+                }
+            });
+            table += '</table>';
+            return table;
         }
-
+    
+        function getColorByPointDataName(pointDataName) {
+            var color, outlineColor;
+            switch (pointDataName.toLowerCase()) {
+                case "house":
+                    color = Cesium.Color.fromCssColorString('rgba(255, 99, 71, 0.6)'); // Light Pink
+                    outlineColor = Cesium.Color.fromCssColorString('rgba(255, 99, 71, 0.6)'); // Hot Pink
+                    break;
+                case "school":
+                    color = Cesium.Color.fromCssColorString('rgba(144, 238, 144, 0.6)'); // Light Green
+                    outlineColor = Cesium.Color.fromCssColorString('rgba(34, 139, 34, 1.0)'); // Forest Green
+                    break;
+                case "hospital":
+                    color = Cesium.Color.fromCssColorString('rgba(173, 216, 230, 0.6)'); // Light Blue
+                    outlineColor = Cesium.Color.fromCssColorString('rgba(0, 0, 255, 1.0)'); // Blue
+                    break;
+                case "shopping mall":
+                    color = Cesium.Color.fromCssColorString('rgba(222, 184, 135, 0.6)'); // BurlyWood
+                    outlineColor = Cesium.Color.fromCssColorString('rgba(139, 69, 19, 1.0)'); // SaddleBrown
+                    break;
+                case "apartment":
+                    color = Cesium.Color.fromCssColorString('rgba(255, 192, 203, 0.6)'); // Pink
+                    outlineColor = Cesium.Color.fromCssColorString('rgba(255, 20, 147, 1.0)'); // DeepPink
+                    break;
+                case "university":
+                    color = Cesium.Color.fromCssColorString('rgba(144, 238, 144, 0.6)'); // Light Green
+                    outlineColor = Cesium.Color.fromCssColorString('rgba(0, 128, 0, 1.0)'); // Green
+                    break;
+                default:
+                    color = Cesium.Color.fromRandom({ alpha: 0.6 });
+                    outlineColor = Cesium.Color.fromRandom({ alpha: 1.0 });
+                    break;
+            }
+            return { material: color, outlineColor: outlineColor };
+        }
+    
         function getHeightPropertyValue(heightProperty) {
             var heightValue = parseFloat(heightProperty.getValue());
             return isNaN(heightValue) ? 0 : heightValue;
         }
-
+    
         function filterBuildings() {
             var pointDataNameInput = document.getElementById('point_data_name').value.toLowerCase();
             var districtInput = document.getElementById('district').value.toLowerCase();
@@ -133,10 +151,10 @@
             var maxPriceInput = parseFloat(document.getElementById('max_price').value);
             var minHeightInput = parseFloat(document.getElementById('min_height').value);
             var maxHeightInput = parseFloat(document.getElementById('max_height').value);
-
+    
             var entities = dataSource.entities.values;
             var filteredEntities = [];
-
+    
             for (var i = 0; i < entities.length; i++) {
                 var entity = entities[i];
                 var pointDataName = entity.properties.point_data_name.getValue().toLowerCase();
@@ -144,7 +162,7 @@
                 var area = parseFloat(entity.properties.area.getValue());
                 var price = parseFloat(entity.properties.price.getValue());
                 var height = parseFloat(entity.properties.height.getValue());
-
+    
                 var show = true;
                 if (pointDataNameInput !== "" && pointDataName !== pointDataNameInput) {
                     show = false;
@@ -157,20 +175,20 @@
                 } else if ((!isNaN(minHeightInput) && (isNaN(height) || height < minHeightInput)) || (!isNaN(maxHeightInput) && (isNaN(height) || height > maxHeightInput))) {
                     show = false;
                 }
-
+    
                 entity.show = show;
-
+    
                 if (show) {
                     filteredEntities.push(entity);
                 }
             }
-
+    
             if (filteredEntities.length > 0) {
                 var boundingSphere = Cesium.BoundingSphere.fromEntities(filteredEntities);
                 viewer.camera.flyToBoundingSphere(boundingSphere);
             }
         }
-
+    
         document.getElementById('filterIcon').addEventListener('click', function() {
             var toolbar = document.getElementById('toolbar');
             if (toolbar.style.display === 'none' || toolbar.style.display === '') {
@@ -179,7 +197,7 @@
                 toolbar.style.display = 'none';
             }
         });
-
+    
         loadGeoJsonData();
     </script>
 </body>

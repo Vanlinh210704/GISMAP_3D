@@ -1,0 +1,184 @@
+body, html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+#cesiumContainer {
+    width: 100%;
+    height: 100%;
+}
+#toolbar {
+    position: absolute;
+    top: 10px;
+    left: 50px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+}
+#toolbar input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: calc(100% - 20px);
+}
+#filterIcon {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    cursor: pointer;
+    z-index: 10;
+}
+#filterIcon:hover {
+    background: rgba(245, 245, 245, 0.9);
+}
+#test { width: 20%; height: 100%; }
+#cesiumContainer { width: 100%; height: 100%; }
+/* body, html { width: 85%; height: 100%; margin: 0; padding: 0; } */
+/* Thay đổi giao diện bảng thông tin */
+
+.cesium-infoBox {
+
+    background-color: rgb(0, 0, 0) !important; 
+    border: 1px solid #ffffff !important; 
+    color: #000000 !important;
+    padding: 10px !important; 
+    border-radius: 10px !important; 
+    width: 20%;
+    left: 10px;
+
+}
+
+.cesium-infoBox table {
+    width: 50%;
+}
+
+.cesium-infoBox th, .cesium-infoBox td {
+    padding: 5px 10px; 
+}
+.cesium-infoBox-description table {
+    color: #000000;
+}
+
+.cesium-infoBox th {
+    text-align: left;
+}
+.cesium-svgPath-svg{
+    display: none;
+}
+.cesium-geocoder-searchButton{
+    display: none;
+}
+.cesium-viewer-geocoderContainer .cesium-geocoder-input{
+    display: none;
+}
+.cesium-button .cesium-toolbar-button .cesium-home-button{
+    display: none;
+}
+.cesium-toolbar-button{
+    width: 0;
+    height: 0;
+}
+.cesium-viewer-bottom{
+    width: 0;
+    height: 0;
+}
+.cesium-animation-shuttleRingG{
+    width: 0;
+    height: 0;
+}
+#animation_buttonNormal{
+    width: 0;
+    height: 0;
+}
+.cesium-animation-shuttleRingBack{
+    width: 0;
+    height: 0;
+    display: none;
+}
+.cesium-animation-shuttleRingSwoosh{
+    width: 0;
+    height: 0;
+    display: none;
+}
+.cesium-animation-buttonMain{
+    width: 0;
+    height: 0;
+    display: none;
+}
+.cesium-animation-rectButton .cesium-animation-buttonToggled{
+    width: 0;
+    height: 0;
+    display: none;
+}
+.cesium-animation-knobOuter{
+    width: 0;
+    height: 0;
+    display: none;
+}
+.cesium-animation-blank{
+    width: 0;
+    height: 0;
+    display: none;  
+}
+.cesium-animation-knobInner{
+    fill: none ;
+}
+.cesium-animation-shuttleRingPointer{
+    fill: none ;
+}
+.cesium-animation-rectButton .cesium-animation-buttonPath{
+    fill: none ;
+}
+.cesium-animation-buttonToggled .cesium-animation-buttonGlow {
+    fill: none ;
+}
+.cesium-animation-svgText{
+    fill: none ;
+    width: 0;
+    height: 0;
+}
+body {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    position: relative;
+}
+.content {
+    flex: 1;
+    padding: 20px;
+}
+.sidebar {
+    width: 300px;
+    background-color: #f4f4f4;
+    padding: 20px;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+    position: fixed;
+    top: 0;
+    right: -320px; /* Ẩn thanh sidebar hoàn toàn */
+    height: 100%;
+    overflow-y: auto;
+    transition: right 0.3s ease;
+}
+.sidebar.open {
+    right: 0; /* Hiển thị thanh sidebar khi mở */
+}
+#toggleButton {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 1000;
+}

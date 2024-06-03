@@ -12,7 +12,7 @@ view_cesium_router.get("/", function(req, res) {
             res.status(500).send('Internal Server Error');
             return;
         }
-
+        
         const geojsonResult = result.rows[0].geojson;
         res.render('cesium', { geojsonResult });
     });
