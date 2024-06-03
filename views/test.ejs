@@ -113,7 +113,7 @@
 
         </div>
     </div>
-
+    <iframe src="cesium.ejs" sandbox="allow-scripts" style="width:100%; height:500px; border:none;"></iframe>
     <div id="loadingOverlay"></div>
     <div id="toolbar" style="position: absolute; top: 0; left: 0; background: rgba(255, 255, 255, 0.8); padding: 10px;">
         <input type="text" id="point_data_name" placeholder="Enter point_data_name">
@@ -168,7 +168,7 @@
                 var value = properties[propertyName].getValue();
                 if (propertyName === "image_gallery_link" && value) {
                     // Nếu thuộc tính là 'link' và có giá trị, tạo một liên kết
-                    table += '<tr><th>' + propertyName + '</th><td><a href="' + value + '" target="_blank">Xem Them</a></td></tr>';
+                    table += '<tr><th>' + propertyName + '</th><td><a href="#" onclick="window.open(\'' + value + '\', \'_blank\');" rel="noopener noreferrer">Xem Thêm</a></td></tr>';
                 } else {
                     // Nếu không phải là 'link', hiển thị giá trị bình thường
                     table += '<tr><th>' + propertyName + '</th><td>' + value + '</td></tr>';
@@ -177,6 +177,7 @@
             table += '</table>';
             return table;
         }
+
 
         function getColorByPointDataName(pointDataName) {
             switch (pointDataName.toLowerCase()) {
