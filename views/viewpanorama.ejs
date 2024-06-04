@@ -12,10 +12,25 @@
             background-color: #000;
         }
         #nextBtn {
+            background-color: white;
+            border: none;
+            border-radius: 5px;
+            color: black;
+            padding: 7px 7px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
             position: fixed;
-            top: 20px;
-            left: 20px;
+            top: 94%;
+            left: 88%;
             z-index: 10;
+        }
+        #nextBtn:hover {
+            background-color: gray;
+            box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
         }
         #bar {
             position: fixed;
@@ -40,13 +55,12 @@
     </style>
 </head>
 <body>
-
     <div id="progress">
         <div id="bar"></div>
     </div>
-    <iframe  id="container" src="" sandbox="allow-scripts"></iframe>
+    <div id="container"></div>
 
-    <button id="nextBtn"><img id="nextBtnImg" alt="Next Panorama"></button>
+    <button id="nextBtn">Xem thêm</button>
 
     <!-- Thêm tải thư viện PANOLENS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/panolens/1.6.0/panolens.min.js"></script>

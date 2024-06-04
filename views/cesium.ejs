@@ -1,20 +1,22 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hiển Thị Dữ Liệu Địa Lý Tương Tác</title>
+    <title>Interactive GeoData Visualization</title>
     <script src="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Cesium.js"></script>
     <link href="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7HUi bX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="../css/style_cesium.css">
+    <style>
+
+    </style>
 </head>
 <body>
-  
 
     <div id="cesiumContainer" class="fullSize"></div>
     <div id="loadingOverlay"></div>
@@ -30,7 +32,6 @@
         <input type="number" id="max_price" placeholder="Giá tối đa" oninput="filterBuildings()">
         <input type="number" id="min_height" placeholder="Chiều cao tối thiểu" oninput="filterBuildings()">
         <input type="number" id="max_height" placeholder="Chiều cao tối đa" oninput="filterBuildings()">
-        <!-- Thêm các hộp kiểm để bật/tắt các lớp -->
         <div id="layerControls">
             <label><input type="checkbox" class="layerToggle" value="house" checked> Nhà</label>
             <label><input type="checkbox" class="layerToggle" value="school" checked> Trường học</label>
@@ -40,7 +41,23 @@
             <label><input type="checkbox" class="layerToggle" value="university" checked> Đại học</label>
         </div>
     </div>
-    
+    <!-- <div class="sidebar" id="sidebar">
+        <div class="widget">
+            <h2>Tiêu đề Tiện ích</h2>
+            <p>Nội dung của tiện ích.</p>
+        </div>
+    </div> -->
+    <!-- <button id="toggleButton">≡</button> -->
+    <!-- <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleButton = document.getElementById('toggleButton');
+            const sidebar = document.getElementById('sidebar');
+
+            toggleButton.addEventListener('click', function() {
+                sidebar.classList.toggle('open');
+            });
+        });
+    </script> -->
     <script>
         var viewer = new Cesium.Viewer('cesiumContainer', {
             animation: true,
@@ -49,86 +66,132 @@
             shouldAnimate: true,
             imageryProvider: false // Disable default imagery provider
         });
-    
-        // Thêm lớp OpenStreetMap
+        viewer.scene.screenSpaceCameraController.enableZoom = true;
+        viewer.infoBox.frame.removeAttribute("sandbox"); //2 dòng này quan trọng mất 1 ngày để tìm ra 
+        viewer.infoBox.frame.src = "about:blank";//2 dòng này quan trọng mất 1 ngày để tìm ra 
+        // Add OpenStreetMap imagery layer
         viewer.imageryLayers.addImageryProvider(new Cesium.OpenStreetMapImageryProvider({
             url: 'https://a.tile.openstreetmap.org/'
         }));
-    
+
         var dataSource;
-    
+
         function loadGeoJsonData() {
-            console.log("Đang tải dữ liệu GeoJSON...");
+            console.log("Loading GeoJSON data...");
             var geojsonFeature = JSON.parse('<%- JSON.stringify(geojsonResult) %>');
             console.log("GeoJSON Feature: ", geojsonFeature);
             var promise = Cesium.GeoJsonDataSource.load(geojsonFeature);
-    
+
             promise.then(function(result) {
-                console.log("GeoJSON tải thành công");
+                console.log("GeoJSON loaded successfully");
                 dataSource = result;
                 viewer.dataSources.add(dataSource);
-    
+
                 var entities = dataSource.entities.values;
                 for (var i = 0; i < entities.length; i++) {
                     var entity = entities[i];
-                    console.log("Thuộc tính của thực thể: ", entity.properties);
+                    console.log("Entity properties: ", entity.properties);
                     var pointDataName = entity.properties.point_data_name.getValue();
                     entity.polygon.material = getColorByPointDataName(pointDataName).material;
                     entity.polygon.extrudedHeight = getHeightPropertyValue(entity.properties.height);
                     entity.description = createInfoTable(entity.properties);
-                    // Đặt đường viền và màu đường viền
+
+                    // Set outline and outline color
                     entity.polygon.outline = true;
                     entity.polygon.outlineColor = getColorByPointDataName(pointDataName).outlineColor;
                 }
-    
+
                 viewer.zoomTo(dataSource);
             }).catch(function(error) {
-                console.error("Lỗi khi tải GeoJSON:", error);
+                console.error("Error loading GeoJSON:", error);
             });
         }
-    
         function createInfoTable(properties) {
             var table = '<table class="cesium-infoBox">';
-            properties.propertyNames.forEach(function(propertyName) {
+            properties.propertyNames.forEach(function (propertyName) {
                 var value = properties[propertyName].getValue();
-                if (propertyName === "image_gallery_link" && value) {
-                    // Tạo liên kết có thể nhấp nếu thuộc tính là 'image_gallery_link' và nó có giá trị
-                    table += '<tr><th>' + propertyName + '</th><td><a href="' + value + '" target="_blank" >Xem thêm</a></td></tr>';
-                } else {
-                    // Hiển thị giá trị bình thường cho tất cả các thuộc tính khác
-                    table += '<tr><th>' + propertyName + '</th><td>' + value + '</td></tr>';
+                var buildingId = properties.building_id.getValue();
+                var displayName = propertyName; // Tên hiển thị của thuộc tính
+                var displayValue = value; // Giá trị hiển thị của thuộc tính
+          
+                // Định dạng lại dữ liệu cho các thuộc tính cụ thể
+                switch (propertyName) {
+                  case "area":
+                    displayName = "Diện tích";
+                    displayValue = parseFloat(value).toFixed(2) + " m²";
+                    break;
+                  case "price":
+                    displayName = "Giá";
+                    if (value) {
+                      displayValue = (parseFloat(value) / 1000000000).toFixed(2) + " tỷ VND";
+                    } else {
+                      displayValue = "Không có thông tin";
+                    }
+                    break;
+                  case "height":
+                    displayName = "Chiều cao";
+                    if (value) {
+                      displayValue = parseFloat(value).toFixed(2) + " m";
+                    } else {
+                      displayValue = "Không có thông tin";
+                    }
+                    break;
+                  case "district":
+                    displayName = "Phường";
+                    displayValue = value;
+                    break;
+                  case "status":
+                    displayName = "Trạng thái";
+                    displayValue = "Không có thông tin";
+                    break;
+                  case "image_gallery_link":
+                    displayName = "Link ảnh Panorama";
+                    if (value) {
+                      displayValue = '<a style="color: black;" href="' + value + '/' + buildingId +'" target="_blank">Xem thêm</a>';
+                    } else {
+                      displayValue = "Không có thông tin";
+                    }
+                    break;
                 }
+          
+                // Ẩn hai dữ liệu "point_data_id" và "point_data_name"
+                if (propertyName === "point_data_id" || propertyName === "building_id" || propertyName === "point_data_name" || propertyName === "building_name") {
+                  return; // Không làm gì và thoát khỏi hàm
+                }
+          
+                // Hiển thị tên thuộc tính và giá trị thuộc tính
+                table += '<tr style="color: black; "><th>' + displayName + '</th><td>' + displayValue + '</td></tr>';
             });
             table += '</table>';
             return table;
-        }
-    
+          }
+
         function getColorByPointDataName(pointDataName) {
             var color, outlineColor;
             switch (pointDataName.toLowerCase()) {
                 case "house":
-                    color = Cesium.Color.fromCssColorString('rgba(255, 99, 71, 0.6)'); // Màu đỏ nhạt
-                    outlineColor = Cesium.Color.fromCssColorString('rgba(255, 99, 71, 0.6)'); // Màu đỏ
+                    color = Cesium.Color.fromCssColorString('rgba(255, 99, 71, 0.6)'); // Light Pink
+                    outlineColor = Cesium.Color.fromCssColorString('rgba(255, 99, 71, 0.6)'); // Hot Pink
                     break;
                 case "school":
-                    color = Cesium.Color.fromCssColorString('rgba(144, 238, 144, 0.6)'); // Màu xanh lá nhạt
-                    outlineColor = Cesium.Color.fromCssColorString('rgba(34, 139, 34, 1.0)'); // Màu xanh rừng
+                    color = Cesium.Color.fromCssColorString('rgba(144, 238, 144, 0.6)'); // Light Green
+                    outlineColor = Cesium.Color.fromCssColorString('rgba(34, 139, 34, 1.0)'); // Forest Green
                     break;
                 case "hospital":
-                    color = Cesium.Color.fromCssColorString('rgba(173, 216, 230, 0.6)'); // Màu xanh dương nhạt
-                    outlineColor = Cesium.Color.fromCssColorString('rgba(0, 0, 255, 1.0)'); // Màu xanh dương
+                    color = Cesium.Color.fromCssColorString('rgba(173, 216, 230, 0.6)'); // Light Blue
+                    outlineColor = Cesium.Color.fromCssColorString('rgba(0, 0, 255, 1.0)'); // Blue
                     break;
                 case "shopping mall":
-                    color = Cesium.Color.fromCssColorString('rgba(222, 184, 135, 0.6)'); // Màu BurlyWood
-                    outlineColor = Cesium.Color.fromCssColorString('rgba(139, 69, 19, 1.0)'); // Màu SaddleBrown
+                    color = Cesium.Color.fromCssColorString('rgba(222, 184, 135, 0.6)'); // BurlyWood
+                    outlineColor = Cesium.Color.fromCssColorString('rgba(139, 69, 19, 1.0)'); // SaddleBrown
                     break;
                 case "apartment":
-                    color = Cesium.Color.fromCssColorString('rgba(255, 192, 203, 0.6)'); // Màu hồng
-                    outlineColor = Cesium.Color.fromCssColorString('rgba(255, 20, 147, 1.0)'); // Màu hồng đậm
+                    color = Cesium.Color.fromCssColorString('rgba(255, 192, 203, 0.6)'); // Pink
+                    outlineColor = Cesium.Color.fromCssColorString('rgba(255, 20, 147, 1.0)'); // DeepPink
                     break;
                 case "university":
-                    color = Cesium.Color.fromCssColorString('rgba(144, 238, 144, 0.6)'); // Màu xanh lá nhạt
-                    outlineColor = Cesium.Color.fromCssColorString('rgba(0, 128, 0, 1.0)'); // Màu xanh
+                    color = Cesium.Color.fromCssColorString('rgba(144, 238, 144, 0.6)'); // Light Green
+                    outlineColor = Cesium.Color.fromCssColorString('rgba(0, 128, 0, 1.0)'); // Green
                     break;
                 default:
                     color = Cesium.Color.fromRandom({ alpha: 0.6 });
@@ -137,12 +200,13 @@
             }
             return { material: color, outlineColor: outlineColor };
         }
-    
+
+
         function getHeightPropertyValue(heightProperty) {
             var heightValue = parseFloat(heightProperty.getValue());
             return isNaN(heightValue) ? 0 : heightValue;
         }
-    
+
         function filterBuildings() {
             var pointDataNameInput = document.getElementById('point_data_name').value.toLowerCase();
             var districtInput = document.getElementById('district').value.toLowerCase();
@@ -152,10 +216,10 @@
             var maxPriceInput = parseFloat(document.getElementById('max_price').value);
             var minHeightInput = parseFloat(document.getElementById('min_height').value);
             var maxHeightInput = parseFloat(document.getElementById('max_height').value);
-    
+
             var entities = dataSource.entities.values;
             var filteredEntities = [];
-    
+
             for (var i = 0; i < entities.length; i++) {
                 var entity = entities[i];
                 var pointDataName = entity.properties.point_data_name.getValue().toLowerCase();
@@ -163,7 +227,7 @@
                 var area = parseFloat(entity.properties.area.getValue());
                 var price = parseFloat(entity.properties.price.getValue());
                 var height = parseFloat(entity.properties.height.getValue());
-    
+
                 var show = true;
                 if (pointDataNameInput !== "" && pointDataName !== pointDataNameInput) {
                     show = false;
@@ -176,20 +240,19 @@
                 } else if ((!isNaN(minHeightInput) && (isNaN(height) || height < minHeightInput)) || (!isNaN(maxHeightInput) && (isNaN(height) || height > maxHeightInput))) {
                     show = false;
                 }
-    
+
                 entity.show = show;
-    
+
                 if (show) {
                     filteredEntities.push(entity);
                 }
             }
-    
+
             if (filteredEntities.length > 0) {
                 var boundingSphere = Cesium.BoundingSphere.fromEntities(filteredEntities);
                 viewer.camera.flyToBoundingSphere(boundingSphere);
             }
         }
-    
         // Thêm sự kiện để bật/tắt các lớp
         var layerToggles = document.querySelectorAll('.layerToggle');
         layerToggles.forEach(function(toggle) {
@@ -204,8 +267,41 @@
                     }
                 }
             });
-        });
-    
+        }); 
+
+        // Các giá trị màu tương ứng với từng tòa nhà
+        var colorMappings = {
+            house: 'rgba(255, 99, 71, 0.6)', // Light Pink
+            school: 'rgba(144, 238, 144, 0.6)', // Light Green
+            hospital: 'rgba(173, 216, 230, 0.6)', // Light Blue
+            "shopping mall": 'rgba(222, 184, 135, 0.6)', // BurlyWood
+            apartment: 'rgba(255, 192, 203, 0.6)', // Pink
+            university: 'rgba(144, 238, 144, 0.6)' // Light Green
+        };
+
+        // Lắng nghe sự kiện thay đổi trạng thái của checkbox
+        var checkboxes = document.getElementsByClassName('layerToggle');
+        for (var i = 0; i < checkboxes.length; i++) {
+            checkboxes[i].addEventListener('change', updateCheckboxColor);
+        }        
+
+        // Cập nhật màu cho checkbox khi có sự thay đổi
+        function updateCheckboxColor(event) {
+            var checkbox = event.target;
+            var pointDataName = checkbox.value;
+            var color = colorMappings[pointDataName];
+
+            if (color) {
+                checkbox.parentNode.style.backgroundColor = color;
+            }
+        }       
+
+        // Mặc định, cập nhật màu cho các checkbox khi trang web được tải
+                var defaultCheckboxes = document.getElementsByClassName('layerToggle');
+        for (var i = 0; i < defaultCheckboxes.length; i++) {
+            updateCheckboxColor({ target: defaultCheckboxes[i] });
+        }
+
         document.getElementById('filterIcon').addEventListener('click', function() {
             var toolbar = document.getElementById('toolbar');
             if (toolbar.style.display === 'none' || toolbar.style.display === '') {
@@ -214,8 +310,9 @@
                 toolbar.style.display = 'none';
             }
         });
-    
+
         loadGeoJsonData();
+
     </script>
 </body>
 </html>

@@ -116,7 +116,8 @@
             shouldAnimate: true,
             imageryProvider: false // Disable default imagery provider
         });
-
+        viewer.infoBox.frame.removeAttribute("sandbox"); //2 dòng này quan trọng mất 1 ngày để tìm ra 
+        viewer.infoBox.frame.src = "about:blank";//2 dòng này quan trọng mất 1 ngày để tìm ra 
         // Add OpenStreetMap imagery layer
         viewer.imageryLayers.addImageryProvider(new Cesium.OpenStreetMapImageryProvider({
             url: 'https://a.tile.openstreetmap.org/'
@@ -125,7 +126,7 @@
         var dataSource;
 
         function loadGeoJsonData() {
-            var geojsonFeature = JSON.parse('<%- geojsonResult %>');
+            var geojsonFeature = JSON.parse('<%- JSON.stringify(geojsonResult) %>');
             var promise = Cesium.GeoJsonDataSource.load(geojsonFeature);
 
             promise.then(function(result) {
@@ -162,10 +163,12 @@
             var table = '<table class="cesium-infoBox">';
             properties.propertyNames.forEach(function (propertyName) {
               var value = properties[propertyName].getValue();
-          
+              var buildingId = properties.building_id.getValue();
+                var displayName = propertyName; // Tên hiển thị của thuộc tính
+                var displayValue = value; // Giá trị hiển thị của thuộc tính
               if (propertyName === "image_gallery_link" && value) {
                 // Create a clickable link if the property is 'image_gallery_link' and it has a value
-                table += '<tr><th>' + propertyName + '</th><td><a href="' + value + '" target="_blank">Xem thêm</a></td></tr>';
+                table += '<tr><th>' + propertyName + '</th><td><a href="' + value + '/' + buildingId + '" target="_blank">Xem thêm</a></td></tr>';
               } else {
                 var displayName = propertyName; // Tên hiển thị của thuộc tính
                 var displayValue = value; // Giá trị hiển thị của thuộc tính
