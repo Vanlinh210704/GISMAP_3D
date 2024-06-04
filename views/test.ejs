@@ -1,144 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Cesium.js"></script>
-  <link href="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-  <style type="text/css">
-    #test { width: 20%; height: 100%; }
-    #cesiumContainer { width: 80%; height: 100%; }
-    /* body, html { width: 85%; height: 100%; margin: 0; padding: 0; } */
-    /* Thay đổi giao diện bảng thông tin */
-    .cesium-infoBox {
-        background-color: rgba(0, 0, 0, 0.7) !important; /* Nền màu đen với độ trong suốt */
-        border: 1px solid #ffffff !important; /* Đường viền trắng */
-        color: #ffffff !important; /* Màu chữ trắng */
-        padding: 10px !important; /* Khoảng cách bên trong */
-        border-radius: 10px !important; /* Bo tròn các góc */
-    }
-
-    .cesium-infoBox table {
-        width: 50%;
-    }
-
-    .cesium-infoBox th, .cesium-infoBox td {
-        padding: 5px 10px; /* Khoảng cách bên trong ô */
-    }
-
-    .cesium-infoBox th {
-        text-align: left; /* Căn trái cho tiêu đề cột */
-    }
-    .cesium-svgPath-svg{
-        display: none;
-    }
-    .cesium-geocoder-searchButton{
-        display: none;
-    }
-    .cesium-viewer-geocoderContainer .cesium-geocoder-input{
-        display: none;
-    }
-    .cesium-button .cesium-toolbar-button .cesium-home-button{
-        display: none;
-    }
-    .cesium-toolbar-button{
-        width: 0;
-        height: 0;
-    }
-    .cesium-viewer-bottom{
-        width: 0;
-        height: 0;
-    }
-    .cesium-animation-shuttleRingG{
-        width: 0;
-        height: 0;
-    }
-    #animation_buttonNormal{
-        width: 0;
-        height: 0;
-    }
-    .cesium-animation-shuttleRingBack{
-        width: 0;
-        height: 0;
-        display: none;
-    }
-    .cesium-animation-shuttleRingSwoosh{
-        width: 0;
-        height: 0;
-        display: none;
-    }
-    .cesium-animation-buttonMain{
-        width: 0;
-        height: 0;
-        display: none;
-    }
-    .cesium-animation-rectButton .cesium-animation-buttonToggled{
-        width: 0;
-        height: 0;
-        display: none;
-    }
-    .cesium-animation-knobOuter{
-        width: 0;
-        height: 0;
-        display: none;
-    }
-    .cesium-animation-blank{
-        width: 0;
-        height: 0;
-        display: none;  
-    }
-    .cesium-animation-knobInner{
-        fill: none ;
-    }
-    .cesium-animation-shuttleRingPointer{
-        fill: none ;
-    }
-    .cesium-animation-rectButton .cesium-animation-buttonPath{
-        fill: none ;
-    }
-    .cesium-animation-buttonToggled .cesium-animation-buttonGlow {
-        fill: none ;
-    }
-    .cesium-animation-svgText{
-        fill: none ;
-        width: 0;
-        height: 0;
-    }
-  </style>
-</head>
-<body>
-    <div style="display: flex;">
-        <div id="cesiumContainer" class="ád">
-            <svg:svg style="display: none;"></svg:svg>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiển Thị Dữ Liệu Địa Lý Tương Tác</title>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7HUi bX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="../css/style_cesium.css">
+    <style>
+        body, html {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #cesiumContainer {
+            width: 100%;
+            height: 100%;
+        }
+        #toolbar {
+            position: absolute;
+            top: 10px;
+            left: 50px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+        }
+        #toolbar input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: calc(100% - 20px);
+        }
+        #filterIcon {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 10;
+        }
+        #filterIcon:hover {
+            background: rgba(245, 245, 245, 0.9);
+        }
+        #cesium-infoBox {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        
+        #cesium-infoBox th,
+        #cesium-infoBox td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        #cesium-infoBox th {
+            font-weight: bold;
+            background-color: #f2f2f2;
+        }
+        
+        #cesium-infoBox a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        
+        #cesium-infoBox a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    </head>
+    <body>
+        <div id="cesiumContainer" class="fullSize"></div>
+        <div id="loadingOverlay"></div>
+        <div id="filterIcon" onclick="toggleLayers()">
+            <i class="fas fa-filter"></i>
         </div>
-        <div id="test" class="sdfdf" >
-
+        <div id="toolbar">
+            <input type="text" id="point_data_name" placeholder="Tên điểm dữ liệu" oninput="filterBuildings()">
+            <input type="text" id="district" placeholder="Quận" oninput="filterBuildings()">
+            <input type="number" id="min_area" placeholder="Diện tích tối thiểu" oninput="filterBuildings()">
+            <input type="number" id="max_area" placeholder="Diện tích tối đa" oninput="filterBuildings()">
+            <input type="number" id="min_price" placeholder="Giá tối thiểu" oninput="filterBuildings()">
+            <input type="number" id="max_price" placeholder="Giá tối đa" oninput="filterBuildings()">
+            <input type="number" id="min_height" placeholder="Chiều cao tối thiểu" oninput="filterBuildings()">
+            <input type="number" id="max_height" placeholder="Chiều cao tối đa" oninput="filterBuildings()">
+            <!-- Thêm các hộp kiểm để bật/tắt các lớp -->
+            <div id="layerControls">
+                <label><input type="checkbox" class="layerToggle" value="house" checked> Nhà</label>
+                <label><input type="checkbox" class="layerToggle" value="school" checked> Trường học</label>
+                <label><input type="checkbox" class="layerToggle" value="hospital" checked> Bệnh viện</label>
+                <label><input type="checkbox" class="layerToggle" value="shopping mall" checked> Trung tâm mua sắm</label>
+                <label><input type="checkbox" class="layerToggle" value="apartment" checked> Căn hộ</label>
+                <label><input type="checkbox" class="layerToggle" value="university" checked> Đại học</label>
+            </div>
         </div>
-    </div>
-    <iframe src="cesium.ejs" sandbox="allow-scripts" style="width:100%; height:500px; border:none;"></iframe>
-    <div id="loadingOverlay"></div>
-    <div id="toolbar" style="position: absolute; top: 0; left: 0; background: rgba(255, 255, 255, 0.8); padding: 10px;">
-        <input type="text" id="point_data_name" placeholder="Enter point_data_name">
-        <!-- <input type="text" id="district" placeholder="Enter district">
-        <input type="number" id="min_area" placeholder="Min Area">
-        <input type="number" id="max_area" placeholder="Max Area">
-        <input type="number" id="min_price" placeholder="Min Price">
-        <input type="number" id="max_price" placeholder="Max Price">
-        <input type="number" id="min_height" placeholder="Min Height">
-        <input type="number" id="max_height" placeholder="Max Height"> -->
-        <button onclick="filterBuildings()">Search</button>
-    </div>
-    <script type="text/javascript">
-        var viewer = new Cesium.Viewer("cesiumContainer", {
-
+    <script>
+        var viewer = new Cesium.Viewer('cesiumContainer', {
             animation: true,
             timeline: false,
             fullscreenButton: false,
-            shouldAnimate: true
+            shouldAnimate: true,
+            imageryProvider: false // Disable default imagery provider
         });
-            
+
+        // Add OpenStreetMap imagery layer
+        viewer.imageryLayers.addImageryProvider(new Cesium.OpenStreetMapImageryProvider({
+            url: 'https://a.tile.openstreetmap.org/'
+        }));
+
         var dataSource;
 
         function loadGeoJsonData() {
-            var geojsonFeature = JSON.parse('<%- JSON.stringify(geojsonResult) %>'); 
+            var geojsonFeature = JSON.parse('<%- geojsonResult %>');
             var promise = Cesium.GeoJsonDataSource.load(geojsonFeature);
 
             promise.then(function(result) {
@@ -151,9 +138,10 @@
                     var pointDataName = entity.properties.point_data_name.getValue();
                     entity.polygon.material = getColorByPointDataName(pointDataName);
                     entity.polygon.extrudedHeight = getHeightPropertyValue(entity.properties.height);
-
-                    // Tạo bảng thông tin động
                     entity.description = createInfoTable(entity.properties);
+                    // Set outline and outline color
+                    entity.polygon.outline = true;
+                    entity.polygon.outlineColor = getColorByPointDataName(pointDataName).outlineColor;
                 }
 
                 viewer.zoomTo(dataSource);
@@ -162,33 +150,121 @@
             });
         }
 
-        function createInfoTable(properties) {
+        function convertToTitleCase(text) {
+            return text
+              .split('_')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+              .join(' ');
+          }
+        
+
+          function createInfoTable(properties) {
             var table = '<table class="cesium-infoBox">';
-            properties.propertyNames.forEach(function(propertyName) {
-                var value = properties[propertyName].getValue();
-                if (propertyName === "image_gallery_link" && value) {
-                    // Nếu thuộc tính là 'link' và có giá trị, tạo một liên kết
-                    table += '<tr><th>' + propertyName + '</th><td><a href="#" onclick="window.open(\'' + value + '\', \'_blank\');" rel="noopener noreferrer">Xem Thêm</a></td></tr>';
-                } else {
-                    // Nếu không phải là 'link', hiển thị giá trị bình thường
-                    table += '<tr><th>' + propertyName + '</th><td>' + value + '</td></tr>';
+            properties.propertyNames.forEach(function (propertyName) {
+              var value = properties[propertyName].getValue();
+          
+              if (propertyName === "image_gallery_link" && value) {
+                // Create a clickable link if the property is 'image_gallery_link' and it has a value
+                table += '<tr><th>' + propertyName + '</th><td><a href="' + value + '" target="_blank">Xem thêm</a></td></tr>';
+              } else {
+                var displayName = propertyName; // Tên hiển thị của thuộc tính
+                var displayValue = value; // Giá trị hiển thị của thuộc tính
+          
+                // Định dạng lại dữ liệu cho các thuộc tính cụ thể
+                switch (propertyName) {
+                  case "area":
+                    displayName = "Diện tích";
+                    displayValue = parseFloat(value).toFixed(2) + " m²";
+                    break;
+                  case "price":
+                    displayName = "Giá";
+                    if (value) {
+                      displayValue = (parseFloat(value) / 1000000000).toFixed(2) + " tỷ VND";
+                    } else {
+                      displayValue = "Không có thông tin";
+                    }
+                    break;
+                  case "height":
+                    displayName = "Chiều cao";
+                    if (value) {
+                      displayValue = parseFloat(value).toFixed(2) + " m";
+                    } else {
+                      displayValue = "Không có thông tin";
+                    }
+                    break;
+                  case "district":
+                    displayName = "Phường";
+                    displayValue = convertToTitleCase(value);
+                    break;
+                  case "status":
+                    displayName = "Trạng thái";
+                    displayValue = "Không có thông tin";
+                    break;
+                  case "image_gallery_link":
+                    displayName = "Link ảnh Panorama";
+                    if (value) {
+                      displayValue = '<a href="' + value + '" target="_blank">Xem thêm</a>';
+                    } else {
+                      displayValue = "Không có thông tin";
+                    }
+                    break;
+                  case "point_data_name":
+                    displayName = "Tên điểm dữ liệu";
+                    displayValue = value;
+                    break;
+                  case "building_name":
+                    displayName = "Tên tòa nhà";
+                    displayValue = 'Khong có thông tin';
+                    break;
                 }
+          
+                // Ẩn hai dữ liệu "point_data_id" và "point_data_name"
+                if (propertyName === "point_data_id" || propertyName === "point_data_name") {
+                  return; // Không làm gì và thoát khỏi hàm
+                }
+          
+                // Hiển thị tên thuộc tính và giá trị thuộc tính
+                table += '<tr><th>' + displayName + '</th><td>' + displayValue + '</td></tr>';
+              }
             });
             table += '</table>';
             return table;
-        }
-
+          }
+        
 
         function getColorByPointDataName(pointDataName) {
+            var color, outlineColor;
             switch (pointDataName.toLowerCase()) {
-                case "house": return Cesium.Color.YELLOW.withAlpha(0.6);
-                case "school": return Cesium.Color.GREEN.withAlpha(0.6);
-                case "hospital": return Cesium.Color.BLUE.withAlpha(0.6);
-                case "shopping mall": return Cesium.Color.RED.withAlpha(0.6);
-                case "apartment": return Cesium.Color.PINK.withAlpha(0.6);
-                case "university": return Cesium.Color.GREEN.withAlpha(0.6);
-                default: return Cesium.Color.fromRandom({ alpha: 0.6 });
+                case "house":
+                    color = Cesium.Color.fromCssColorString('rgba(255, 99, 71, 0.6)'); // Light Pink
+                    outlineColor = Cesium.Color.fromCssColorString('rgba(255, 99, 71, 0.6)'); // Hot Pink
+                    break;
+                case "school":
+                    color = Cesium.Color.fromCssColorString('rgba(144, 238, 144, 0.6)'); // Light Green
+                    outlineColor = Cesium.Color.fromCssColorString('rgba(34, 139, 34, 1.0)'); // Forest Green
+                    break;
+                case "hospital":
+                    color = Cesium.Color.fromCssColorString('rgba(173, 216, 230, 0.6)'); // Light Blue
+                    outlineColor = Cesium.Color.fromCssColorString('rgba(0, 0, 255, 1.0)'); // Blue
+                    break;
+                case "shopping mall":
+                    color = Cesium.Color.fromCssColorString('rgba(222, 184, 135, 0.6)'); // BurlyWood
+                    outlineColor = Cesium.Color.fromCssColorString('rgba(139, 69, 19, 1.0)'); // SaddleBrown
+                    break;
+                case "apartment":
+                    color = Cesium.Color.fromCssColorString('rgba(255, 192, 203, 0.6)'); // Pink
+                    outlineColor = Cesium.Color.fromCssColorString('rgba(255, 20, 147, 1.0)'); // DeepPink
+                    break;
+                case "university":
+                    color = Cesium.Color.fromCssColorString('rgba(144, 238, 144, 0.6)'); // Light Green
+                    outlineColor = Cesium.Color.fromCssColorString('rgba(0, 128, 0, 1.0)'); // Green
+                    break;
+                default:
+                    color = Cesium.Color.fromRandom({ alpha: 0.6 });
+                    outlineColor = Cesium.Color.fromRandom({ alpha: 1.0 });
+                    break;
             }
+            return { material: color, outlineColor: outlineColor };
         }
 
         function getHeightPropertyValue(heightProperty) {
@@ -197,16 +273,18 @@
         }
 
         function filterBuildings() {
-            var pointDataNameInput = document.getElementById("point_data_name").value.toLowerCase();
-            var districtInput = document.getElementById("district").value.toLowerCase();
-            var minAreaInput = parseFloat(document.getElementById("min_area").value);
-            var maxAreaInput = parseFloat(document.getElementById("max_area").value);
-            var minPriceInput = parseFloat(document.getElementById("min_price").value);
-            var maxPriceInput = parseFloat(document.getElementById("max_price").value);
-            var minHeightInput = parseFloat(document.getElementById("min_height").value);
-            var maxHeightInput = parseFloat(document.getElementById("max_height").value);
+            var pointDataNameInput = document.getElementById('point_data_name').value.toLowerCase();
+            var districtInput = document.getElementById('district').value.toLowerCase();
+            var minAreaInput = parseFloat(document.getElementById('min_area').value);
+            var maxAreaInput = parseFloat(document.getElementById('max_area').value);
+            var minPriceInput = parseFloat(document.getElementById('min_price').value);
+            var maxPriceInput = parseFloat(document.getElementById('max_price').value);
+            var minHeightInput = parseFloat(document.getElementById('min_height').value);
+            var maxHeightInput = parseFloat(document.getElementById('max_height').value);
 
             var entities = dataSource.entities.values;
+            var filteredEntities = [];
+
             for (var i = 0; i < entities.length; i++) {
                 var entity = entities[i];
                 var pointDataName = entity.properties.point_data_name.getValue().toLowerCase();
@@ -227,10 +305,80 @@
                 } else if ((!isNaN(minHeightInput) && (isNaN(height) || height < minHeightInput)) || (!isNaN(maxHeightInput) && (isNaN(height) || height > maxHeightInput))) {
                     show = false;
                 }
-                
+
                 entity.show = show;
+
+                if (show) {
+                    filteredEntities.push(entity);
+                }
+            }
+
+            if (filteredEntities.length > 0) {
+                var boundingSphere = Cesium.BoundingSphere.fromEntities(filteredEntities);
+                viewer.camera.flyToBoundingSphere(boundingSphere);
             }
         }
+
+        // Thêm sự kiện để bật/tắt các lớp
+        var layerToggles = document.querySelectorAll('.layerToggle');
+        layerToggles.forEach(function(toggle) {
+            toggle.addEventListener('change', function() {
+                var layerType = this.value;
+                var show = this.checked;
+                var entities = dataSource.entities.values;
+                for (var i = 0; i < entities.length; i++) {
+                    var entity = entities[i];
+                    if (entity.properties.point_data_name.getValue().toLowerCase() === layerType) {
+                        entity.show = show;
+                    }
+                }
+            });
+        });
+
+        // Các giá trị màu tương ứng với từng tòa nhà
+        var colorMappings = {
+            house: 'rgba(255, 99, 71, 0.6)', // Light Pink
+            school: 'rgba(144, 238, 144, 0.6)', // Light Green
+            hospital: 'rgba(173, 216, 230, 0.6)', // Light Blue
+            "shopping mall": 'rgba(222, 184, 135, 0.6)', // BurlyWood
+            apartment: 'rgba(255, 192, 203, 0.6)', // Pink
+            university: 'rgba(144, 238, 144, 0.6)' // Light Green
+        };
+
+        // Lắng nghe sự kiện thay đổi trạng thái của checkbox
+        var checkboxes = document.getElementsByClassName('layerToggle');
+        for (var i = 0; i < checkboxes.length; i++) {
+            checkboxes[i].addEventListener('change', updateCheckboxColor);
+        }
+
+        // Cập nhật màu cho checkbox khi có sự thay đổi
+        function updateCheckboxColor(event) {
+            var checkbox = event.target;
+            var pointDataName = checkbox.value;
+            var color = colorMappings[pointDataName];
+
+            if (color) {
+                checkbox.parentNode.style.backgroundColor = color;
+            }
+        }
+
+        // Mặc định, cập nhật màu cho các checkbox khi trang web được tải
+        var defaultCheckboxes = document.getElementsByClassName('layerToggle');
+        for (var i = 0; i < defaultCheckboxes.length; i++) {
+            updateCheckboxColor({ target: defaultCheckboxes[i] });
+        }
+    
+        document.getElementById('filterIcon').addEventListener('click', function() {
+            var toolbar = document.getElementById('toolbar');
+            if (toolbar.style.display === 'none' || toolbar.style.display === '') {
+                toolbar.style.display = 'flex';
+            } else {
+                toolbar.style.display = 'none';
+            }
+        });
+
+        
+
 
         loadGeoJsonData();
     </script>
