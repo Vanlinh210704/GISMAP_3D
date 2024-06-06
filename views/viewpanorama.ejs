@@ -31,8 +31,16 @@
                             <td class="tb-td"><%= data_bd[0].district%></td>
                         </tr>
                         <tr>
-                            <td class="tb-td">Giá tham khảo: </td>
-                            <td class="tb-td"><%= Math.round(data_bd[0].price).toLocaleString('en') %> VND</td>
+                            <tr>
+                                <td class="tb-td">Giá tham khảo: </td>
+                                <td class="tb-td">
+                                    <% if (data_bd[0].price === null) { %>
+                                        Không có thông tin
+                                    <% } else { %>
+                                        <%= Math.round(data_bd[0].price).toLocaleString('en') %> VND
+                                    <% } %>
+                                </td>
+                            </tr></td>
                         </tr>
                     </table>
                     <div id="progress">
