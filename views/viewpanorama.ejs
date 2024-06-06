@@ -6,59 +6,49 @@
     <title>Panorama Viewer</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        #container {
-            width: 100%;
-            height: 100vh;
-            background-color: #000;
-        }
-        #nextBtn {
-            background-color: white;
-            border: none;
-            border-radius: 5px;
-            color: black;
-            padding: 7px 7px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-            position: fixed;
-            top: 94%;
-            left: 88%;
-            z-index: 10;
-        }
-        #nextBtn:hover {
-            background-color: gray;
-            box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
-        }
-        #bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 5px;
-            background-color: red;
-            width: 0;
-            transition: width 0.2s;
-        }
-        .hide {
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-        img {
-            border-radius: 4px;  /* Rounded border */
-            width: 100px; /* Set a small width */
-        }
-        img:hover {
-            box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
-        }
+
     </style>
 </head>
 <body>
-    <div id="progress">
-        <div id="bar"></div>
+
+    <div class="tour">
+        <div class="container">
+            <div class="left-container">
+                <div class="tour__head">
+                    <h1>Thông Tin Tòa Nhà</h1>
+                    <table class="table-left">
+                        <tr class="tb-tr">
+                            <td class="tb-td">Diện tích: </td>
+                            <td class="tb-td"><%= Math.round(data_bd[0].area).toLocaleString('en') %> m²</td>
+                        </tr>
+                        
+                        <tr>
+                            <td class="tb-td">Chiều cao: </td>
+                            <td class="tb-td"><%= data_bd[0].height.toLocaleString('en') %> m</td>
+                        </tr>
+                        <tr>
+                            <td class="tb-td">Phường: </td>
+                            <td class="tb-td"><%= data_bd[0].district%></td>
+                        </tr>
+                        <tr>
+                            <td class="tb-td">Giá tham khảo: </td>
+                            <td class="tb-td"><%= Math.round(data_bd[0].price).toLocaleString('en') %> VND</td>
+                        </tr>
+                    </table>
+                    <div id="progress">
+                        <div id="bar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-container">
+                <div class="image-container"></div>
+            </div>
+            <!-- 
+  
+             -->
+        </div>
     </div>
-    <div id="container"></div>
 
     <button id="nextBtn">Xem thêm</button>
 
@@ -82,7 +72,7 @@
         }
 
         // Tạo các đối tượng panorama
-        let container = document.querySelector('#container');
+        let container = document.querySelector('.image-container');
         <% imagelinks.forEach((link, index) => { %>
             const panorama<%= index %> = new PANOLENS.ImagePanorama('<%= link %>');
             panorama<%= index %>.addEventListener('progress', onProgressUpdate);
