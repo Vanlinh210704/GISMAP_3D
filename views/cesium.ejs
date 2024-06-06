@@ -27,8 +27,8 @@
         <input type="text" id="district" placeholder="Phường" oninput="filterBuildings()">
         <input type="number" id="min_area" placeholder="Diện tích tối thiểu (m2)" oninput="filterBuildings()">
         <input type="number" id="max_area" placeholder="Diện tích tối đa (m2)" oninput="filterBuildings()">
-        <input type="number" id="min_price" placeholder="Giá tối thiểu (VNĐ)" oninput="filterBuildings()">
-        <input type="number" id="max_price" placeholder="Giá tối đa (VNĐ)" oninput="filterBuildings()">
+        <input type="text" id="min_price" placeholder="Giá tối thiểu (VNĐ)" oninput="filterBuildings()">
+        <input type="text" id="max_price" placeholder="Giá tối đa (VNĐ)" oninput="filterBuildings()">
         <input type="number" id="min_height" placeholder="Chiều cao tối thiểu (m)" oninput="filterBuildings()">
         <input type="number" id="max_height" placeholder="Chiều cao tối đa (m)" oninput="filterBuildings()">
         <div id="layerControls">
@@ -188,13 +188,40 @@
             return isNaN(heightValue) ? 0 : heightValue;
         }
 
+        function convertPriceToNumber(priceString) {
+            // Loại bỏ dấu chấm và dấu phẩy để lấy giá trị số
+            var numberString = priceString.replace(/[,.]/g, '');
+          
+            // Kiểm tra xem có từ "tỷ" trong chuỗi không
+            var billionIndex = numberString.indexOf('tỷ');
+            if (billionIndex !== -1) {
+              var billionValue = parseFloat(numberString.substring(0, billionIndex));
+              var millionIndex = numberString.indexOf('triệu');
+              if (millionIndex !== -1) {
+                var millionValue = parseFloat(numberString.substring(billionIndex + 2, millionIndex));
+                return billionValue * 1000000000 + millionValue * 1000000;
+              } else {
+                return billionValue * 1000000000;
+              }
+            }
+          
+            // Kiểm tra xem có từ "triệu" trong chuỗi không
+            var millionIndex = numberString.indexOf('triệu');
+            if (millionIndex !== -1) {
+              return parseFloat(numberString.substring(0, millionIndex)) * 1000000;
+            }
+          
+            // Trường hợp chuỗi chỉ chứa số, không có đơn vị
+            return parseFloat(numberString);
+          }
+
         function filterBuildings() {
             var pointDataNameInput = document.getElementById('point_data_name').value.toLowerCase();
             var districtInput = document.getElementById('district').value.toLowerCase();
             var minAreaInput = parseFloat(document.getElementById('min_area').value);
             var maxAreaInput = parseFloat(document.getElementById('max_area').value);
-            var minPriceInput = parseFloat(document.getElementById('min_price').value);
-            var maxPriceInput = parseFloat(document.getElementById('max_price').value);
+            var minPriceInput = convertPriceToNumber(document.getElementById('min_price').value);
+            var maxPriceInput = convertPriceToNumber(document.getElementById('max_price').value);
             var minHeightInput = parseFloat(document.getElementById('min_height').value);
             var maxHeightInput = parseFloat(document.getElementById('max_height').value);
 
