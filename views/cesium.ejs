@@ -31,6 +31,7 @@
         <input type="text" id="max_price" placeholder="Giá tối đa (VNĐ)" oninput="filterBuildings()">
         <input type="number" id="min_height" placeholder="Chiều cao tối thiểu (m)" oninput="filterBuildings()">
         <input type="number" id="max_height" placeholder="Chiều cao tối đa (m)" oninput="filterBuildings()">
+        <button id="backButton">Quay lại</button>
         <div id="layerControls">
             <label><input type="checkbox" class="layerToggle" value="nhà ở " checked> Nhà</label>
             <label><input type="checkbox" class="layerToggle" value="trường học" checked> Trường học</label>
@@ -291,6 +292,59 @@
                 }
             });
         }); 
+
+        // Biến lưu trữ trạng thái ban đầu của các trường tìm kiếm
+        var initialFilters = {
+            pointDataName: "",
+            district: "",
+            minArea: "",
+            maxArea: "",
+            minPrice: "",
+            maxPrice: "",
+            minHeight: "",
+            maxHeight: ""
+        };
+
+        // Lưu trữ trạng thái ban đầu khi trang được tải
+        window.onload = function() {
+            saveInitialFilters();
+        };
+
+        // Hàm lưu trữ trạng thái ban đầu của các trường tìm kiếm
+        function saveInitialFilters() {
+            initialFilters.pointDataName = document.getElementById('point_data_name').value;
+            initialFilters.district = document.getElementById('district').value;
+            initialFilters.minArea = document.getElementById('min_area').value;
+            initialFilters.maxArea = document.getElementById('max_area').value;
+            initialFilters.minPrice = document.getElementById('min_price').value;
+            initialFilters.maxPrice = document.getElementById('max_price').value;
+            initialFilters.minHeight = document.getElementById('min_height').value;
+            initialFilters.maxHeight = document.getElementById('max_height').value;
+        }
+
+        // Hàm khôi phục trạng thái ban đầu của các trường tìm kiếm
+        function restoreInitialFilters() {
+            document.getElementById('point_data_name').value = initialFilters.pointDataName;
+            document.getElementById('district').value = initialFilters.district;
+            document.getElementById('min_area').value = initialFilters.minArea;
+            document.getElementById('max_area').value = initialFilters.maxArea;
+            document.getElementById('min_price').value = initialFilters.minPrice;
+            document.getElementById('max_price').value = initialFilters.maxPrice;
+            document.getElementById('min_height').value = initialFilters.minHeight;
+            document.getElementById('max_height').value = initialFilters.maxHeight;
+        }
+
+        // Đăng ký sự kiện nhấp vào nút "Quay lại"
+        document.getElementById("backButton").addEventListener("click", goBack);
+
+        // Hàm xử lý sự kiện "Quay lại"
+        function goBack() {
+            // Khôi phục trạng thái ban đầu của các trường tìm kiếm
+            restoreInitialFilters();
+
+            // Thực hiện lại tìm kiếm
+            filterBuildings();
+        }
 
         // Các giá trị màu tương ứng với từng tòa nhà
         var colorMappings = {
