@@ -2,7 +2,7 @@ body {
     margin: 0;
     overflow: hidden;
     box-sizing: border-box;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'OpenSans', sans-serif;
 }
 .tour {
     background: #074357;
@@ -24,8 +24,8 @@ canvas {
     margin: 0 auto;
     overflow: hidden;
     height: 100%;
-    border: 2px solid #ebb47a;
-    border-radius: 10px;
+    border: 1px solid gray;
+    border-radius: 5px;
 }
 .container {
     width: 100%;
@@ -84,16 +84,16 @@ img:hover {
     padding-right: 20px;
 }
 h1 {
-    color: black;
+    color: #005ba0;
 }
 .table-left {
     margin-top: 10%;
-    border: 2px solid #f2ae8f;
+    border: 1px solid gray;
     border-radius: 5px;
     margin-left: 7%;
     font-size: 25px;
-    color: aliceblue;
-    background-color: gray;
+    color: black;
+    background-color: white;
 }
 .tb-tr {
     padding: 5px;
